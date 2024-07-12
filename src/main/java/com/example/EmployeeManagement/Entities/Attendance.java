@@ -14,8 +14,9 @@ public class Attendance {
     @Column(name = "ATTENDANCE_ID")
     private int attendanceId;
 
-    @Column(name = "EMPLOYEE_ID")
-    private int employeeId;
+    @ManyToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "EMPLOYEE_ID")
+    private Employee employee;
 
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "CHECK_IN_TIME")
@@ -35,17 +36,24 @@ public class Attendance {
     public Attendance() {
     }
 
-    public Attendance(int employeeId, Date checkInTime, Date checkOutTime, Date attendanceDate, byte[] image) {
-        this.employeeId = employeeId;
+    public Attendance(Date checkInTime, Date checkOutTime, Date attendanceDate, byte[] image) {
         this.checkInTime = checkInTime;
         this.checkOutTime = checkOutTime;
         this.attendanceDate = attendanceDate;
         this.image = image;
     }
 
-    public Attendance(int attendanceId, int employeeId, Date checkInTime, Date checkOutTime, Date attendanceDate, byte[] image) {
+    public Attendance(Employee employee, Date checkInTime, Date checkOutTime, Date attendanceDate, byte[] image) {
+        this.employee = employee;
+        this.checkInTime = checkInTime;
+        this.checkOutTime = checkOutTime;
+        this.attendanceDate = attendanceDate;
+        this.image = image;
+    }
+
+    public Attendance(int attendanceId, Employee employee, Date checkInTime, Date checkOutTime, Date attendanceDate, byte[] image) {
         this.attendanceId = attendanceId;
-        this.employeeId = employeeId;
+        this.employee = employee;
         this.checkInTime = checkInTime;
         this.checkOutTime = checkOutTime;
         this.attendanceDate = attendanceDate;
@@ -60,12 +68,12 @@ public class Attendance {
         this.attendanceId = attendanceId;
     }
 
-    public int getEmployeeId() {
-        return employeeId;
+    public Employee getEmployee() {
+        return employee;
     }
 
-    public void setEmployeeId(int employeeId) {
-        this.employeeId = employeeId;
+    public void setEmployee(Employee employee) {
+        this.employee = employee;
     }
 
     public Date getCheckInTime() {

@@ -1,7 +1,6 @@
 package com.example.EmployeeManagement.Entities;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.*;
 import jakarta.annotation.Nullable;
 import jakarta.persistence.*;
 
@@ -21,7 +20,8 @@ public class Department {
     private String description;
 
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "department", cascade = CascadeType.ALL)
-    @JsonManagedReference
+    @JsonIgnoreProperties("department")
+//    @JsonManagedReference
     private List<Employee> employeeList;
 
     @Column(name = "MANAGER_ID")

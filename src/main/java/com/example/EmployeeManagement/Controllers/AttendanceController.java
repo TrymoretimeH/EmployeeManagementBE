@@ -1,8 +1,10 @@
 package com.example.EmployeeManagement.Controllers;
 
 import com.example.EmployeeManagement.Entities.Attendance;
+import com.example.EmployeeManagement.Entities.Employee;
 import com.example.EmployeeManagement.Handlers.ResponseHandler;
 import com.example.EmployeeManagement.Services.AttendanceService;
+import com.example.EmployeeManagement.Services.EmployeeService;
 import com.example.EmployeeManagement.Utils.DateTimeUtil;
 import com.example.EmployeeManagement.Utils.ImageUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,6 +32,9 @@ public class AttendanceController {
     @Autowired
     AttendanceService attendanceService;
 
+    @Autowired
+    EmployeeService employeeService;
+
     @PreAuthorize("hasAuthority('ADMIN')")
     @GetMapping("/all")
     public List<Attendance> getAllAttendance() {
@@ -44,44 +49,57 @@ public class AttendanceController {
 
     @PostMapping("/add")
     public ResponseEntity<?> addAttendance(@RequestParam("image") MultipartFile file, int employeeId, Date checkInTime, Date checkOutTime, Date attendanceDate) throws IOException {
-        Attendance attendance = new Attendance(employeeId, checkInTime, checkOutTime, attendanceDate, ImageUtil.compressImage(file.getBytes()));
-        Optional<Attendance> existD = attendanceService.getAttendanceById(attendance.getAttendanceId());
-        if (existD.isPresent()) {
-            return ResponseHandler.generateResponse(HttpStatus.BAD_REQUEST, false, "Attendance already exists", attendance);
+        Optional<Employee> existE = employeeService.getEmployeeById(employeeId);
+        if (!existE.isPresent()) {
+            return ResponseHandler.generateResponse(HttpStatus.NOT_FOUND, false, "Could not find employee", null);
         } else {
-            attendanceService.add(attendance);
-            return ResponseHandler.generateResponse(HttpStatus.OK, true, "Create a new attendance successfully", attendance);
+            Attendance attendance = new Attendance(existE.get(), checkInTime, checkOutTime, attendanceDate, ImageUtil.compressImage(file.getBytes()));
+            Optional<Attendance> existD = attendanceService.getAttendanceById(attendance.getAttendanceId());
+            if (existD.isPresent()) {
+                return ResponseHandler.generateResponse(HttpStatus.BAD_REQUEST, false, "Attendance already exists", attendance);
+            } else {
+                attendanceService.add(attendance);
+                return ResponseHandler.generateResponse(HttpStatus.OK, true, "Create a new attendance successfully", attendance);
+            }
         }
+
 //        return ResponseHandler.generateResponse(HttpStatus.OK, true, "Attendance already exists", attendance);
     }
 
     @PreAuthorize("hasAuthority('ADMIN')")
     @PutMapping("/update")
     public ResponseEntity<?> updateAttendance(MultipartFile image, int employeeId, int attendanceId, Date checkInTime, Date checkOutTime, Date attendanceDate) throws IOException {
-        Optional<Attendance> existD = attendanceService.getAttendanceById(attendanceId);
-        if (existD.isPresent()) {
-            Attendance attendance = existD.get();
-            if (image != null) {
-                System.out.println("UPDATE IMAGE!");
-                attendance.setImage(ImageUtil.compressImage(image.getBytes()));
-            }
-            if (checkInTime != null) {
-                attendance.setCheckInTime(checkInTime);
-            }
-            if (checkOutTime != null) {
-                attendance.setCheckOutTime(checkOutTime);
-            }
-            if (attendanceDate != null) {
-                attendance.setAttendanceDate(attendanceDate);
-            }
-            attendance.setEmployeeId(employeeId);
-            //            Attendance attendance = new Attendance(attendanceId, employeeId, checkInTime, checkOutTime, attendanceDate, ImageUtil.compressImage(file.getBytes()));
-
-            attendanceService.update(attendance);
-            return ResponseHandler.generateResponse(HttpStatus.OK, true, "Update a attendance successfully", attendance);
+        Optional<Employee> existE = employeeService.getEmployeeById(employeeId);
+        if (!existE.isPresent()) {
+            return ResponseHandler.generateResponse(HttpStatus.NOT_FOUND, false, "Could not find employee", null);
         } else {
-            return ResponseHandler.generateResponse(HttpStatus.NOT_FOUND, false, "Can not found attendance", null);
+            Optional<Attendance> existD = attendanceService.getAttendanceById(attendanceId);
+            if (existD.isPresent()) {
+                Attendance attendance = existD.get();
+                if (image != null) {
+                    System.out.println("UPDATE IMAGE!");
+                    attendance.setImage(ImageUtil.compressImage(image.getBytes()));
+                }
+                if (checkInTime != null) {
+                    attendance.setCheckInTime(checkInTime);
+                }
+                if (checkOutTime != null) {
+                    attendance.setCheckOutTime(checkOutTime);
+                }
+                if (attendanceDate != null) {
+                    attendance.setAttendanceDate(attendanceDate);
+                }
+                attendance.setEmployee(existE.get());
+                //            Attendance attendance = new Attendance(attendanceId, employeeId, checkInTime, checkOutTime, attendanceDate, ImageUtil.compressImage(file.getBytes()));
+
+                attendanceService.update(attendance);
+                return ResponseHandler.generateResponse(HttpStatus.OK, true, "Update a attendance successfully", attendance);
+            } else {
+                return ResponseHandler.generateResponse(HttpStatus.NOT_FOUND, false, "Can not found attendance", null);
+            }
         }
+
+
 
     }
 

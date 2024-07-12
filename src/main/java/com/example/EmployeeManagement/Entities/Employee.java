@@ -1,8 +1,6 @@
 package com.example.EmployeeManagement.Entities;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.*;
 import jakarta.persistence.*;
 
 import java.util.Date;
@@ -41,7 +39,8 @@ public class Employee {
 
     @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "DEPARTMENT_ID")
-    @JsonBackReference
+    @JsonIgnoreProperties("employeeList")
+//    @JsonBackReference
     private Department department;
 
     @Column(name = "SALARY_ID")
