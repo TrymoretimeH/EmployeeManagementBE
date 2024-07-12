@@ -21,8 +21,6 @@ public class AccountController {
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody Account account) {
-        System.out.println("ZO");
-        System.out.println(account.getEmail());
         Optional<Account> ExistA = accountService.doLogin(account.getEmail(), account.getPassword());
         if (ExistA.isEmpty()) {
             return ResponseEntity.notFound().build();

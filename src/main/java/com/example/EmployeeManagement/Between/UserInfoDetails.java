@@ -1,5 +1,6 @@
 package com.example.EmployeeManagement.Between;
 
+import com.example.EmployeeManagement.Entities.Employee;
 import com.example.EmployeeManagement.Entities.UserInfo;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -16,26 +17,23 @@ public class UserInfoDetails implements UserDetails {
     private String name;
     private String password;
     private List<GrantedAuthority> authorities;
-    private int empId;
+    private Employee employee;
 
     public UserInfoDetails(UserInfo userInfo) {
-        name = userInfo.getEmail();
-        password = userInfo.getPassword();
-        authorities = Arrays.stream(userInfo.getRoles().split(","))
+        this.name = userInfo.getEmail();
+        this.password = userInfo.getPassword();
+        this.authorities = Arrays.stream(userInfo.getRoles().split(","))
                 .map(SimpleGrantedAuthority::new)
                 .collect(Collectors.toList());
-        empId = userInfo.getEmpId();
+        this.employee = userInfo.getEmployee();
     }
 
-    public UserInfoDetails() {
+    public Employee getEmployee() {
+        return employee;
     }
 
-    public int getEmpId() {
-        return empId;
-    }
-
-    public void setEmpId(int empId) {
-        this.empId = empId;
+    public void setEmployee(Employee employee) {
+        this.employee = employee;
     }
 
     @Override

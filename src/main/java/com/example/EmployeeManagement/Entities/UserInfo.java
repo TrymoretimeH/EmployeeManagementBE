@@ -25,10 +25,22 @@ public class UserInfo {
     @Column(name = "ROLES")
     private String roles;
 
-    @Nullable
-    @Column(name = "EMP_ID")
-    private Integer empId;
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "EMP_ID")
+    private Employee employee;
 
+    public UserInfo(int id, String name, String email, String password, String roles, Employee employee) {
+        this.id = id;
+        this.name = name;
+        this.email = email;
+        this.password = password;
+        this.roles = roles;
+        this.employee = employee;
+    }
+
+    public UserInfo() {
+
+    }
 
     public int getId() {
         return id;
@@ -70,14 +82,14 @@ public class UserInfo {
         this.roles = roles;
     }
 
-    public int getEmpId() {
-        if (empId == null) {
-            return 0;
+    public Employee getEmployee() {
+        if (employee == null) {
+            return new Employee();
         }
-        return empId;
+        return employee;
     }
 
-    public void setEmpId(int empId) {
-        this.empId = empId;
+    public void setEmployee(Employee employee) {
+        this.employee = employee;
     }
 }

@@ -1,5 +1,6 @@
 package com.example.EmployeeManagement.Services;
 
+import com.example.EmployeeManagement.Entities.Employee;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -22,17 +23,17 @@ public class JwtService {
     @Value("${jwtKey}")
     public String SECRET;
 
-    public String generateToken(String email, int empId, Collection<? extends GrantedAuthority> roles) {
+    public String generateToken(String email, Employee employee, Collection<? extends GrantedAuthority> roles) {
         Map<String, Object> claims = new HashMap<>();
-        return createToken(claims, email, empId, roles);
+        return createToken(claims, email, employee, roles);
     }
 
-    private String createToken(Map<String, Object> claims, String email, int empId, Collection<? extends GrantedAuthority> roles) {
+    private String createToken(Map<String, Object> claims, String email, Employee employee, Collection<? extends GrantedAuthority> roles) {
         Map<String, Object> rolesClaim = new HashMap<>();
         Map<String, Object> empClaim = new HashMap<>();
 
         rolesClaim.put("roles", roles.stream().map(GrantedAuthority::getAuthority).collect(Collectors.joining(",")));
-        empClaim.put("empId", empId);
+        empClaim.put("employee", employee);
         return Jwts.builder()
                 .setClaims(claims)
                 .setSubject(email)
@@ -78,6 +79,8 @@ public class JwtService {
 
     public Boolean validateToken(String token, UserDetails userDetails) {
         final String userName = extractUserName(token);
+        System.out.println("Claim Exact: " + userName);
+        System.out.println("User Name: " + userDetails.getUsername());
         return (userName.equals(userDetails.getUsername()) && !isTokenExpired(token));
     }
 

@@ -68,9 +68,7 @@ public class UserController {
         if (authentication.isAuthenticated()) {
             Map<String, String> tokenMap = new HashMap<>();
             UserInfoDetails userInfoDetails = (UserInfoDetails) authentication.getPrincipal();
-            System.out.println("CHECK AFTER AUTHENTICATION");
-            System.out.println(userInfoDetails.getEmpId());
-            tokenMap.put("token", jwtService.generateToken(authRequest.getEmail(), userInfoDetails.getEmpId(), authentication.getAuthorities()));
+            tokenMap.put("token", jwtService.generateToken(authRequest.getEmail(), userInfoDetails.getEmployee(), authentication.getAuthorities()));
             return ResponseHandler.generateResponse(HttpStatus.OK, true, "Generate token successfully", tokenMap);
         } else {
             return ResponseHandler.generateResponse(HttpStatus.BAD_REQUEST, false, "Generate token failure", null);

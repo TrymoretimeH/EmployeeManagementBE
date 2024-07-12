@@ -22,10 +22,11 @@ public class UserInfoService implements UserDetailsService {
     private PasswordEncoder encoder;
 
     @Override
-    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
+    public UserInfoDetails loadUserByUsername(String email) throws UsernameNotFoundException {
         Optional<UserInfo> userDetail = userInfoRepository.findByEmail(email);
         Optional<UserInfoDetails> userInfoDetails = userDetail.map(UserInfoDetails::new);
         if (userInfoDetails.isPresent()) {
+            System.out.println("CHECK ROLES: " + userInfoDetails.get().getAuthorities());
             return userInfoDetails.get();
         } else {
             throw new UsernameNotFoundException("Email not found" + email);
