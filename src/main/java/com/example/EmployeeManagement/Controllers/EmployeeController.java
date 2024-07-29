@@ -1,7 +1,10 @@
 package com.example.EmployeeManagement.Controllers;
 
+import com.example.EmployeeManagement.DTOs.EmployeeDTO;
+import com.example.EmployeeManagement.Entities.Department;
 import com.example.EmployeeManagement.Entities.Employee;
 import com.example.EmployeeManagement.Handlers.ResponseHandler;
+import com.example.EmployeeManagement.Services.DepartmentService;
 import com.example.EmployeeManagement.Services.EmployeeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -21,20 +24,48 @@ public class EmployeeController {
     @Autowired
     EmployeeService employeeService;
 
+    @Autowired
+    DepartmentService departmentService;
+
     @GetMapping("/all")
     public List<Employee> getAllEmployees() {
         return employeeService.getAllEmployees();
     }
 
     @PostMapping("/add")
-    public ResponseEntity<?> addEmployee(@RequestBody Employee employee) {
+    public ResponseEntity<?> addEmployee(@RequestBody EmployeeDTO employee) {
         Optional<Employee> existE = employeeService.findByEmail(employee.getEmail());
         if (existE.isPresent()) {
             return ResponseHandler.generateResponse(HttpStatus.BAD_REQUEST, false, "Email already exists", employee);
         } else {
-            employeeService.add(employee);
-            return ResponseHandler.generateResponse(HttpStatus.OK, true, "Create a new employee successfully", null);
+            Optional<Department> department = departmentService.getDepartmentById(employee.getDepartmentId());
+            if (department.isPresent()) {
+                Employee newE = getEmployee(employee, department.get());
+                System.out.println("CHECK ADD EMP!");
+
+                System.out.println(newE.getSalaryId());
+                employeeService.add(newE);
+                return ResponseHandler.generateResponse(HttpStatus.OK, true, "Create a new employee successfully", newE);
+            }
+
+            return ResponseHandler.generateResponse(HttpStatus.NOT_FOUND, false, "Can not found department", employee);
         }
+    }
+
+    private static Employee getEmployee(EmployeeDTO employee, Department department) {
+        Employee newE = new Employee();
+        newE.setDepartment(department);
+
+        newE.setEmail(employee.getEmail());
+        newE.setFirstName(employee.getFirstName());
+        newE.setLastName(employee.getLastName());
+        newE.setAddress(employee.getAddress());
+        newE.setPhoneNumber(employee.getPhoneNumber());
+        newE.setDateOfBirth(employee.getDateOfBirth());
+        newE.setHireDate(employee.getHireDate());
+        newE.setPosition(employee.getPosition());
+        newE.setSalaryId(employee.getSalaryId());
+        return newE;
     }
 
     @PutMapping("/update")

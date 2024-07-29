@@ -13,13 +13,14 @@ import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 public class UserInfoDetails implements UserDetails {
-
+    private int id;
     private String name;
     private String password;
     private List<GrantedAuthority> authorities;
     private Employee employee;
 
     public UserInfoDetails(UserInfo userInfo) {
+        this.id = userInfo.getId();
         this.name = userInfo.getEmail();
         this.password = userInfo.getPassword();
         this.authorities = Arrays.stream(userInfo.getRoles().split(","))
@@ -30,6 +31,14 @@ public class UserInfoDetails implements UserDetails {
 
     public Employee getEmployee() {
         return employee;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
     }
 
     public void setEmployee(Employee employee) {

@@ -20,7 +20,7 @@ import java.util.stream.Collectors;
 @Component
 public class JwtService {
 
-    @Value("${jwtKey}")
+    @Value("${jwtSecret}")
     public String SECRET;
 
     public String generateToken(String email, Employee employee, Collection<? extends GrantedAuthority> roles) {
