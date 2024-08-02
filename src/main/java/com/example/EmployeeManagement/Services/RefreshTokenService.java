@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.sql.Ref;
 import java.time.Instant;
 import java.util.Optional;
 import java.util.UUID;
@@ -34,14 +35,20 @@ public class RefreshTokenService {
     public RefreshToken createRefreshToken(Integer userId) {
         RefreshToken refreshToken = new RefreshToken();
 
-        Optional<UserInfo> eU = userInfoRepository.findById(userId);
-        if (eU.isPresent()) {
-            refreshToken.setUser(eU.get());
-            refreshToken.setExpiryDate(Instant.now().plusMillis(refreshTokenDurationMs));
-            refreshToken.setToken(UUID.randomUUID().toString());
-
-            refreshToken = refreshTokenRepository.save(refreshToken);
+        Optional<RefreshToken> eRT = refreshTokenRepository.findByUserId(userId);
+        if (eRT.isPresent()) {
+            refreshToken = eRT.get();
         } else {
+            Optional<UserInfo> eU = userInfoRepository.findById(userId);
+            if (eU.isPresent()) {
+                refreshToken.setUser(eU.get());
+                refreshToken.setExpiryDate(Instant.now().plusMillis(refreshTokenDurationMs));
+                refreshToken.setToken(UUID.randomUUID().toString());
+
+                refreshToken = refreshTokenRepository.save(refreshToken);
+            } else {
+                System.out.println("USER NOT FOUND");
+            }
         }
 
         return refreshToken;

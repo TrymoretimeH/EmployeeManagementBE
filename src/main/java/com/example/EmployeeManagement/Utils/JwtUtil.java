@@ -33,16 +33,17 @@ public class JwtUtil {
 
     public ResponseCookie generateJwtCookie(UserInfoDetails userInfoDetails) {
         String jwt = generateTokenFromUsername(userInfoDetails.getUsername());
-        return generateCookie(jwtCookie, jwt, "/api");
+//        60 - 60s | 60 * 60 - 1h | 2 * 60 - 2p
+        return generateCookie(jwtCookie, jwt, "/api", 2 * 60);
     }
 
     public ResponseCookie generateJwtCookie(UserInfo user) {
         String jwt = generateTokenFromUsername(user.getEmail());
-        return generateCookie(jwtCookie, jwt, "/api");
+        return generateCookie(jwtCookie, jwt, "/api", 2 * 60);
     }
 
     public ResponseCookie generateJwtRefreshCookie(String refreshToken) {
-        return generateCookie(jwtRefreshCookie, refreshToken, "/api/auth/refreshtoken");
+        return generateCookie(jwtRefreshCookie, refreshToken, "/api/auth/refreshtoken", 7 * 24 * 60 * 60);
     }
 
     public String getJwtFromCookies(HttpServletRequest request) {
@@ -92,9 +93,14 @@ public class JwtUtil {
                 .compact();
     }
 
-    private ResponseCookie generateCookie(String name, String value, String path) {
-        return ResponseCookie.from(name, value).path(path).maxAge(24 * 60 * 60).httpOnly(true).build();
+    private ResponseCookie generateCookie(String name, String value, String path, int maxAge) {
+        return ResponseCookie.from(name, value).path(path).maxAge(maxAge)
+                .httpOnly(true)
+                .sameSite("None")
+                .secure(true)
+                .build();
     }
+
 
     private String getCookieValueByName(HttpServletRequest request, String name) {
         Cookie cookie = WebUtils.getCookie(request, name);

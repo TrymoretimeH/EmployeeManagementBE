@@ -14,7 +14,7 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/salary")
-@CrossOrigin(origins = "*")
+//@CrossOrigin(origins = "*")
 @PreAuthorize("hasAuthority('ADMIN')")
 public class SalaryController {
 

@@ -37,7 +37,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @RestController
-@CrossOrigin(origins = "*")
+//@CrossOrigin(origins = "*")
 @RequestMapping("/api/auth")
 public class UserController {
 
@@ -108,8 +108,8 @@ public class UserController {
             ResponseCookie jwtRefreshCookie = jwtUtil.generateJwtRefreshCookie(refreshToken.getToken());
 
             return ResponseEntity.ok()
-                    .header(HttpHeaders.SET_COOKIE, jwtCookie.toString())
-                            .header(HttpHeaders.SET_COOKIE, jwtRefreshCookie.toString())
+                    .header(HttpHeaders.SET_COOKIE, jwtCookie.toString() + "; Partitioned")
+                            .header(HttpHeaders.SET_COOKIE, jwtRefreshCookie.toString() + "; Partitioned")
                                     .body(userInfoResponse);
 
 //            tokenMap.put("token", jwtService.generateToken(authRequest.getEmail(), userInfoDetails.getEmployee(), authentication.getAuthorities()));
@@ -143,16 +143,23 @@ public class UserController {
         ResponseCookie jwtCookie = jwtUtil.getCleanJwtCookie();
         ResponseCookie jwtRefreshCookie = jwtUtil.getCleanJwtRefreshCookie();
 
+        Map<String, Object> mesMap = new HashMap<>();
+
+        mesMap.put("message", "You've been signed out!");
+
         return ResponseEntity.ok()
                 .header(HttpHeaders.SET_COOKIE, jwtCookie.toString())
                 .header(HttpHeaders.SET_COOKIE, jwtRefreshCookie.toString())
-                .body("You've been signed out!");
+                .body(mesMap);
 
     }
 
     @PostMapping("/refreshtoken")
     public ResponseEntity<?> refreshtoken(HttpServletRequest request) {
         String refreshToken = jwtUtil.getJwtRefreshFromCookies(request);
+
+        Map<String, String> mesMap = new HashMap<>();
+        mesMap.put("refreshToken", "TOKEN is refreshed successfully!");
 
         if ((refreshToken != null) && (!refreshToken.isEmpty())) {
             return refreshTokenService.findByToken(refreshToken)
@@ -162,8 +169,8 @@ public class UserController {
                         ResponseCookie jwtCookie = jwtUtil.generateJwtCookie(user);
 
                         return ResponseEntity.ok()
-                                .header(HttpHeaders.SET_COOKIE, jwtCookie.toString())
-                                .body("TOKEN is refreshed successfully!");
+                                .header(HttpHeaders.SET_COOKIE, jwtCookie.toString() + "; Partitioned")
+                                .body(mesMap);
                     })
                     .orElseThrow(() -> new TokenRefreshException(refreshToken, "Refresh Token is not in database!"));
         }

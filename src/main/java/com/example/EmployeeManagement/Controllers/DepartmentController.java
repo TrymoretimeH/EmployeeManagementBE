@@ -16,7 +16,7 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/department")
-@CrossOrigin(origins = "*")
+//@CrossOrigin(origins = "*")
 @PreAuthorize("hasAuthority('ADMIN')")
 public class DepartmentController {
 
