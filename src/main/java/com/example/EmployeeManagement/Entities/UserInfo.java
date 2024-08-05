@@ -38,6 +38,14 @@ public class UserInfo {
         this.employee = employee;
     }
 
+    public UserInfo(int id, String name, String email, String roles, Employee employee) {
+        this.id = id;
+        this.name = name;
+        this.email = email;
+        this.roles = roles;
+        this.employee = employee;
+    }
+
     public UserInfo(String name, String email, String password, String roles, Employee employee) {
         this.name = name;
         this.email = email;

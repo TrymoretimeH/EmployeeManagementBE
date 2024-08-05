@@ -35,6 +35,10 @@ public class AttendanceService {
         attendanceRepository.deleteById(id);
     }
 
+    public List<Attendance> getAttendanceByEmployeeId(int id) {
+        return attendanceRepository.findByEmployeeId(id);
+    }
+
 
 
 }

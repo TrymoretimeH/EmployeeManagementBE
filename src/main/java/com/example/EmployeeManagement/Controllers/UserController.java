@@ -10,6 +10,7 @@ import com.example.EmployeeManagement.Handlers.ResponseHandler;
 import com.example.EmployeeManagement.Payload.Request.SignupRequest;
 import com.example.EmployeeManagement.Payload.Response.UserInfoResponse;
 import com.example.EmployeeManagement.Repositories.UserInfoRepository;
+import com.example.EmployeeManagement.Services.EmployeeService;
 import com.example.EmployeeManagement.Services.JwtService;
 import com.example.EmployeeManagement.Services.RefreshTokenService;
 import com.example.EmployeeManagement.Services.UserInfoService;
@@ -57,6 +58,8 @@ public class UserController {
     private UserInfoRepository userInfoRepository;
     @Autowired
     private UserInfoService userInfoService;
+    @Autowired
+    private EmployeeService employeeService;
 
     @GetMapping("/welcome")
     public String welcome() {
@@ -66,6 +69,35 @@ public class UserController {
     @PostMapping("/addNewUser")
     public String addNewUser(@RequestBody UserInfo user) {
         return service.addUser(user);
+    }
+
+    @GetMapping("/user/all")
+    @PreAuthorize("hasAuthority('ADMIN')")
+    public List<UserInfo> getAllUsers() { return userInfoRepository.findAll(); }
+
+    @PostMapping("/user/save")
+    @PreAuthorize("hasAuthority('ADMIN')")
+    public ResponseEntity<?> saveUser(@RequestBody UserInfo user) {
+        Optional<UserInfo> eU = userInfoRepository.findById(user.getId());
+        if (eU.isPresent()) {
+            user.setPassword(eU.get().getPassword());
+            userInfoRepository.save(user);
+            return ResponseHandler.generateResponse(HttpStatus.OK, true, "Save user successfully!", user);
+        } else {
+            return ResponseHandler.generateResponse(HttpStatus.NOT_FOUND, false, "NOT FOUND USER", null);
+        }
+    }
+
+    @DeleteMapping("/user/delete/{id}")
+    @PreAuthorize("hasAuthority('ADMIN')")
+    public ResponseEntity<?> deleteUser(@PathVariable int id) {
+        Optional<UserInfo> eU = userInfoRepository.findById(id);
+        if (eU.isPresent()) {
+            userInfoRepository.deleteById(id);
+            return ResponseHandler.generateResponse(HttpStatus.OK, true, "Delete user successfully!", eU.get());
+        } else {
+            return ResponseHandler.generateResponse(HttpStatus.NOT_FOUND, false, "NOT FOUND USER", null);
+        }
     }
 
     @GetMapping("/user/userProfile")
@@ -86,14 +118,8 @@ public class UserController {
             authRequest.getEmail(), authRequest.getPassword()
         ));
         if (authentication.isAuthenticated()) {
-//            Map<String, String> tokenMap = new HashMap<>();
             UserInfoDetails userInfoDetails = (UserInfoDetails) authentication.getPrincipal();
 
-
-//            dataMap.put("id", String.valueOf(userInfoDetails.getId()));
-//            dataMap.put("name", userInfoDetails.getUsername());
-//            dataMap.put("roles", userInfoDetails.getAuthorities().toString());
-//            empMap.put("employee", userInfoDetails.getEmployee());
             UserInfoResponse userInfoResponse = new UserInfoResponse();
             userInfoResponse.setEmployee(userInfoDetails.getEmployee());
             userInfoResponse.setId(userInfoDetails.getId());
@@ -126,8 +152,34 @@ public class UserController {
         if (eU.isPresent()) {
             return ResponseHandler.generateResponse(HttpStatus.CONFLICT, false, "Email already in use", null);
         } else {
-            UserInfo userInfo = new UserInfo(signupRequest.getName(), signupRequest.getEmail(), encoder.encode(signupRequest.getPassword()), signupRequest.getRoles(), null);
+            UserInfo userInfo = new UserInfo(signupRequest.getName(), signupRequest.getEmail(), signupRequest.getPassword(), signupRequest.getRoles(), null);
             userInfoService.addUser(userInfo);
+
+            Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
+                    signupRequest.getEmail(), signupRequest.getPassword()
+            ));
+            if (authentication.isAuthenticated()) {
+                UserInfoDetails userInfoDetails = (UserInfoDetails) authentication.getPrincipal();
+
+                UserInfoResponse userInfoResponse = new UserInfoResponse();
+                userInfoResponse.setEmployee(userInfoDetails.getEmployee());
+                userInfoResponse.setId(userInfoDetails.getId());
+                userInfoResponse.setName(userInfoDetails.getUsername());
+                userInfoResponse.setRoles(userInfoDetails.getAuthorities());
+
+
+                ResponseCookie jwtCookie = jwtUtil.generateJwtCookie(userInfoDetails);
+
+                RefreshToken refreshToken = refreshTokenService.createRefreshToken(userInfoDetails.getId());
+
+                ResponseCookie jwtRefreshCookie = jwtUtil.generateJwtRefreshCookie(refreshToken.getToken());
+
+                return ResponseEntity.ok()
+                        .header(HttpHeaders.SET_COOKIE, jwtCookie.toString() + "; Partitioned")
+                        .header(HttpHeaders.SET_COOKIE, jwtRefreshCookie.toString() + "; Partitioned")
+                        .body(userInfoResponse);
+            }
+
             return ResponseHandler.generateResponse(HttpStatus.CREATED, true, "User created", null);
         }
     }
@@ -175,7 +227,7 @@ public class UserController {
                     .orElseThrow(() -> new TokenRefreshException(refreshToken, "Refresh Token is not in database!"));
         }
 
-        return ResponseEntity.badRequest().body("Refresh Token is empty!");
+        return ResponseEntity.status(403).body("Refresh Token is empty!");
     }
 
 }

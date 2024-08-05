@@ -33,13 +33,13 @@ public class JwtUtil {
 
     public ResponseCookie generateJwtCookie(UserInfoDetails userInfoDetails) {
         String jwt = generateTokenFromUsername(userInfoDetails.getUsername());
-//        60 - 60s | 60 * 60 - 1h | 2 * 60 - 2p
-        return generateCookie(jwtCookie, jwt, "/api", 2 * 60);
+//        60 - 60s | 60 * 60 - 1h | 30 * 60 - 30p
+        return generateCookie(jwtCookie, jwt, "/api", 30 * 60);
     }
 
     public ResponseCookie generateJwtCookie(UserInfo user) {
         String jwt = generateTokenFromUsername(user.getEmail());
-        return generateCookie(jwtCookie, jwt, "/api", 2 * 60);
+        return generateCookie(jwtCookie, jwt, "/api", 30 * 60);
     }
 
     public ResponseCookie generateJwtRefreshCookie(String refreshToken) {

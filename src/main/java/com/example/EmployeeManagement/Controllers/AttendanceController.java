@@ -1,7 +1,9 @@
 package com.example.EmployeeManagement.Controllers;
 
+import com.example.EmployeeManagement.Between.UserInfoDetails;
 import com.example.EmployeeManagement.Entities.Attendance;
 import com.example.EmployeeManagement.Entities.Employee;
+import com.example.EmployeeManagement.Entities.UserInfo;
 import com.example.EmployeeManagement.Handlers.ResponseHandler;
 import com.example.EmployeeManagement.Services.AttendanceService;
 import com.example.EmployeeManagement.Services.EmployeeService;
@@ -11,6 +13,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -18,10 +23,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.sql.Time;
 import java.sql.Timestamp;
-import java.util.Base64;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @RestController
 @RequestMapping("/api/attendance")
@@ -35,14 +37,30 @@ public class AttendanceController {
     @Autowired
     EmployeeService employeeService;
 
-    @PreAuthorize("hasAuthority('ADMIN')")
     @GetMapping("/all")
+    @PreAuthorize("hasAuthority('ADMIN') || hasAuthority('USER')")
     public List<Attendance> getAllAttendance() {
-        List<Attendance> list = attendanceService.getAllAttendances();
-        for (Attendance attendance : list) {
-            attendance.setImage(ImageUtil.decompressImage(attendance.getImage()));
+        UserInfoDetails userInfoDetails = (UserInfoDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        boolean isAdmin = userInfoDetails.getAuthorities().contains(new SimpleGrantedAuthority("ADMIN"));
+        if (isAdmin) {
+            List<Attendance> list = attendanceService.getAllAttendances();
+            for (Attendance attendance : list) {
+                attendance.setImage(ImageUtil.decompressImage(attendance.getImage()));
+            }
+            return list;
         }
-        return list;
+
+        boolean isUser = userInfoDetails.getAuthorities().contains(new SimpleGrantedAuthority("USER"));
+        if (isUser) {
+            int id = userInfoDetails.getEmployee().getId();
+
+            List<Attendance> list = attendanceService.getAttendanceByEmployeeId(id);
+            for (Attendance attendance : list) {
+                attendance.setImage(ImageUtil.decompressImage(attendance.getImage()));
+            }
+            return list;
+        }
+        return new ArrayList<>();
     }
 
 

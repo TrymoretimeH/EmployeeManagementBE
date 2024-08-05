@@ -34,8 +34,6 @@ public class EmployeeService {
         employeeRepository.deleteById(id);
     }
 
-
-
     public Optional<Employee> findByEmail(String email) {
         return employeeRepository.findByEmail(email);
     }

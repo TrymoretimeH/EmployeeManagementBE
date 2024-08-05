@@ -1,24 +1,30 @@
 package com.example.EmployeeManagement.Controllers;
 
+import com.example.EmployeeManagement.Between.UserInfoDetails;
 import com.example.EmployeeManagement.DTOs.EmployeeDTO;
+import com.example.EmployeeManagement.Entities.Attendance;
 import com.example.EmployeeManagement.Entities.Department;
 import com.example.EmployeeManagement.Entities.Employee;
 import com.example.EmployeeManagement.Handlers.ResponseHandler;
 import com.example.EmployeeManagement.Services.DepartmentService;
 import com.example.EmployeeManagement.Services.EmployeeService;
+import com.example.EmployeeManagement.Utils.ImageUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/employee")
 //@CrossOrigin(origins = "*")
-@PreAuthorize("hasAuthority('ADMIN')")
+@PreAuthorize("hasAuthority('ADMIN') || hasAuthority('USER')")
 public class EmployeeController {
 
     @Autowired
@@ -29,9 +35,25 @@ public class EmployeeController {
 
     @GetMapping("/all")
     public List<Employee> getAllEmployees() {
-        return employeeService.getAllEmployees();
+        UserInfoDetails userInfoDetails = (UserInfoDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        boolean isAdmin = userInfoDetails.getAuthorities().contains(new SimpleGrantedAuthority("ADMIN"));
+        if (isAdmin) {
+            return employeeService.getAllEmployees();
+        }
+
+        boolean isUser = userInfoDetails.getAuthorities().contains(new SimpleGrantedAuthority("USER"));
+        if (isUser) {
+            int id = userInfoDetails.getEmployee().getId();
+            List<Employee> list = new ArrayList<>();
+            Optional<Employee> employee = employeeService.getEmployeeById(id);
+            employee.ifPresent(list::add);
+            return list;
+        }
+        return new ArrayList<>();
+
     }
 
+    @PreAuthorize("hasAuthority('ADMIN')")
     @PostMapping("/add")
     public ResponseEntity<?> addEmployee(@RequestBody EmployeeDTO employee) {
         Optional<Employee> existE = employeeService.findByEmail(employee.getEmail());
@@ -68,6 +90,7 @@ public class EmployeeController {
         return newE;
     }
 
+    @PreAuthorize("hasAuthority('ADMIN')")
     @PutMapping("/update")
     public ResponseEntity<?> updateEmployee(@RequestBody Employee employee) {
         Optional<Employee> existE = employeeService.getEmployeeById(employee.getId());
@@ -79,6 +102,7 @@ public class EmployeeController {
         }
     }
 
+    @PreAuthorize("hasAuthority('ADMIN')")
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<?> deleteEmployee(@PathVariable int id) {
         Optional<Employee> existE = employeeService.getEmployeeById(id);
