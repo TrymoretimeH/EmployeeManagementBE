@@ -1,7 +1,6 @@
 package com.example.EmployeeManagement.Entities;
 
 import com.fasterxml.jackson.annotation.*;
-import jakarta.annotation.Nullable;
 import jakarta.persistence.*;
 
 import java.util.List;
@@ -35,10 +34,10 @@ public class Department {
         this.description = description;
     }
 
-    public Department(String departmentName, String description, int managerId) {
+    public Department(String departmentName, String description, int manager) {
         this.departmentName = departmentName;
         this.description = description;
-        this.managerId = managerId;
+        this.managerId = manager;
     }
 
     public Department(String departmentName, String description, List<Employee> employeeList) {
@@ -87,7 +86,7 @@ public class Department {
         return managerId;
     }
 
-    public void setManagerId(int managerId) {
-        this.managerId = managerId;
+    public void setManagerId(Integer manager) {
+        this.managerId = manager;
     }
 }

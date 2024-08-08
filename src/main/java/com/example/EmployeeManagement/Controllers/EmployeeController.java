@@ -2,13 +2,13 @@ package com.example.EmployeeManagement.Controllers;
 
 import com.example.EmployeeManagement.Between.UserInfoDetails;
 import com.example.EmployeeManagement.DTOs.EmployeeDTO;
-import com.example.EmployeeManagement.Entities.Attendance;
 import com.example.EmployeeManagement.Entities.Department;
 import com.example.EmployeeManagement.Entities.Employee;
+import com.example.EmployeeManagement.Entities.UserInfo;
 import com.example.EmployeeManagement.Handlers.ResponseHandler;
 import com.example.EmployeeManagement.Services.DepartmentService;
 import com.example.EmployeeManagement.Services.EmployeeService;
-import com.example.EmployeeManagement.Utils.ImageUtil;
+import com.example.EmployeeManagement.Services.UserInfoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -29,6 +29,9 @@ public class EmployeeController {
 
     @Autowired
     EmployeeService employeeService;
+
+    @Autowired
+    UserInfoService userInfoService;
 
     @Autowired
     DepartmentService departmentService;
@@ -81,7 +84,10 @@ public class EmployeeController {
         newE.setEmail(employee.getEmail());
         newE.setFirstName(employee.getFirstName());
         newE.setLastName(employee.getLastName());
-        newE.setAddress(employee.getAddress());
+        newE.setProvince(employee.getProvince());
+        newE.setDistrict(employee.getDistrict());
+        newE.setWard(employee.getWard());
+//        newE.setAddress(employee.getAddress());
         newE.setPhoneNumber(employee.getPhoneNumber());
         newE.setDateOfBirth(employee.getDateOfBirth());
         newE.setHireDate(employee.getHireDate());
@@ -107,6 +113,22 @@ public class EmployeeController {
     public ResponseEntity<?> deleteEmployee(@PathVariable int id) {
         Optional<Employee> existE = employeeService.getEmployeeById(id);
         if (existE.isPresent()) {
+            Employee employee = existE.get();
+
+            UserInfo userIno = userInfoService.getUserByEmployee(employee);
+
+            if (userIno != null) {
+                userIno.setEmployee(null);
+            }
+
+            List<Department> departments = departmentService.getDepartmentByManagerId(employee.getId());
+
+            if (!departments.isEmpty()) {
+                departments.forEach(department -> {
+                    department.setManagerId(null);
+                });
+            }
+
             employeeService.delete(id);
             return ResponseHandler.generateResponse(HttpStatus.OK, true, "Employee deleted successfully", null);
         } else {

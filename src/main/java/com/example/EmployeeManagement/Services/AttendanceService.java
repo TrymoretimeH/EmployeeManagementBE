@@ -3,6 +3,7 @@ package com.example.EmployeeManagement.Services;
 import com.example.EmployeeManagement.Entities.Attendance;
 import com.example.EmployeeManagement.Repositories.AttendanceRepository;
 import com.example.EmployeeManagement.Repositories.AttendanceRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -39,6 +40,9 @@ public class AttendanceService {
         return attendanceRepository.findByEmployeeId(id);
     }
 
-
-
+    @Transactional
+    public void deleteAttendanceByEmployeeId(int id) {
+        List<Attendance> attendances = getAttendanceByEmployeeId(id);
+        attendanceRepository.deleteAll(attendances);
+    }
 }

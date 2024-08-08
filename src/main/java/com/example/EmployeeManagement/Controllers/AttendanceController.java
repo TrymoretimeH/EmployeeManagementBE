@@ -88,14 +88,13 @@ public class AttendanceController {
     @PutMapping("/update")
     public ResponseEntity<?> updateAttendance(MultipartFile image, int employeeId, int attendanceId, Date checkInTime, Date checkOutTime, Date attendanceDate) throws IOException {
         Optional<Employee> existE = employeeService.getEmployeeById(employeeId);
-        if (!existE.isPresent()) {
+        if (existE.isEmpty()) {
             return ResponseHandler.generateResponse(HttpStatus.NOT_FOUND, false, "Could not find employee", null);
         } else {
             Optional<Attendance> existD = attendanceService.getAttendanceById(attendanceId);
             if (existD.isPresent()) {
                 Attendance attendance = existD.get();
                 if (image != null) {
-                    System.out.println("UPDATE IMAGE!");
                     attendance.setImage(ImageUtil.compressImage(image.getBytes()));
                 }
                 if (checkInTime != null) {

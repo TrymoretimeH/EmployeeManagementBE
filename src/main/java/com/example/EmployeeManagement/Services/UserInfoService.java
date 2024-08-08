@@ -1,6 +1,7 @@
 package com.example.EmployeeManagement.Services;
 
 import com.example.EmployeeManagement.Between.UserInfoDetails;
+import com.example.EmployeeManagement.Entities.Employee;
 import com.example.EmployeeManagement.Entities.UserInfo;
 import com.example.EmployeeManagement.Repositories.UserInfoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,6 +40,10 @@ public class UserInfoService implements UserDetailsService {
         userInfo.setPassword(encoder.encode(userInfo.getPassword()));
         userInfoRepository.save(userInfo);
         return "User added successfully";
+    }
+
+    public UserInfo getUserByEmployee(Employee employee) {
+        return userInfoRepository.findByEmployee(employee);
     }
 
 }

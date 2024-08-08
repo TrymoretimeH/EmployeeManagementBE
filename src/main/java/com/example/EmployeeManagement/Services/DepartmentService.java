@@ -36,6 +36,9 @@ public class DepartmentService {
         departmentRepository.deleteById(id);
     }
 
+    public List<Department> getDepartmentByManagerId(int e) {
+        return departmentRepository.getDepartmentsByManagerId(e);
+    }
 
 
 }

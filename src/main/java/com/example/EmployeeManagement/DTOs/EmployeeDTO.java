@@ -1,5 +1,8 @@
 package com.example.EmployeeManagement.DTOs;
 
+import com.example.EmployeeManagement.Entities.District;
+import com.example.EmployeeManagement.Entities.Province;
+import com.example.EmployeeManagement.Entities.Ward;
 import org.springframework.stereotype.Component;
 
 import java.util.Date;
@@ -7,7 +10,10 @@ import java.util.Date;
 @Component
 public class EmployeeDTO {
     private int id;
-    private String address;
+//    private String address;
+    private Province province;
+    private District district;
+    private Ward ward;
     private Date dateOfBirth;
     private int departmentId;
     private String email;
@@ -21,8 +27,11 @@ public class EmployeeDTO {
     public EmployeeDTO() {
     }
 
-    public EmployeeDTO(String address, Date dateOfBirth, int departmentId, String email, String firstName, String lastName, Date hireDate, String phoneNumber, String position, int salaryId) {
-        this.address = address;
+    public EmployeeDTO(int id, Province provinceCode, District districtCode, Ward wardCode, Date dateOfBirth, int departmentId, String email, String firstName, String lastName, Date hireDate, String phoneNumber, String position, int salaryId) {
+        this.id = id;
+        this.province = provinceCode;
+        this.district = districtCode;
+        this.ward = wardCode;
         this.dateOfBirth = dateOfBirth;
         this.departmentId = departmentId;
         this.email = email;
@@ -34,9 +43,10 @@ public class EmployeeDTO {
         this.salaryId = salaryId;
     }
 
-    public EmployeeDTO(int id, String address, Date dateOfBirth, int departmentId, String email, String firstName, String lastName, Date hireDate, String phoneNumber, String position, int salaryId) {
-        this.id = id;
-        this.address = address;
+    public EmployeeDTO(Province provinceCode, District districtCode, Ward wardCode, Date dateOfBirth, int departmentId, String email, String firstName, String lastName, Date hireDate, String phoneNumber, String position, int salaryId) {
+        this.province = provinceCode;
+        this.district = districtCode;
+        this.ward = wardCode;
         this.dateOfBirth = dateOfBirth;
         this.departmentId = departmentId;
         this.email = email;
@@ -56,12 +66,46 @@ public class EmployeeDTO {
         this.id = id;
     }
 
-    public String getAddress() {
-        return address;
+//    public String getAddress() {
+//        return address;
+//    }
+//
+//    public void setAddress(String address) {
+//        this.address = address;
+//    }
+
+
+    public Province getProvince() {
+//        if (province == null) {
+//            province = new Province();
+//        }
+        return province;
     }
 
-    public void setAddress(String address) {
-        this.address = address;
+    public void setProvince(Province province) {
+        this.province = province;
+    }
+
+    public District getDistrict() {
+//        if (district == null) {
+//            district = new District();
+//        }
+        return district;
+    }
+
+    public void setDistrict(District district) {
+        this.district = district;
+    }
+
+    public Ward getWard() {
+//        if (ward == null) {
+//            ward = new Ward();
+//        }
+        return ward;
+    }
+
+    public void setWard(Ward ward) {
+        this.ward = ward;
     }
 
     public Date getDateOfBirth() {

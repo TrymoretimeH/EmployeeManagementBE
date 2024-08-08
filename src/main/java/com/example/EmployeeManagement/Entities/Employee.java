@@ -2,6 +2,8 @@ package com.example.EmployeeManagement.Entities;
 
 import com.fasterxml.jackson.annotation.*;
 import jakarta.persistence.*;
+import jakarta.transaction.Transactional;
+import org.springframework.security.core.parameters.P;
 
 import java.util.Date;
 
@@ -22,8 +24,20 @@ public class Employee {
     @Column(name = "DATE_OF_BIRTH")
     private Date dateOfBirth;
 
-    @Column(name = "ADDRESS")
-    private String address;
+//    @Column(name = "ADDRESS")
+//    private String address;
+
+    @OneToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @JoinColumn(name = "PROVINCE_CODE", referencedColumnName = "CODE")
+    private Province province;
+
+    @OneToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @JoinColumn(name = "DISTRICT_CODE", referencedColumnName = "CODE")
+    private District district;
+
+    @OneToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @JoinColumn(name = "WARD_CODE", referencedColumnName = "CODE")
+    private Ward ward;
 
     @Column(name = "PHONE_NUMBER")
     private String phoneNumber;
@@ -37,9 +51,9 @@ public class Employee {
     @Column(name = "HIRE_DATE")
     private Date hireDate;
 
-    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinColumn(name = "DEPARTMENT_ID")
-    @JsonIgnoreProperties("employeeList")
+    @JsonIgnoreProperties({"employeeList", "manager"})
 //    @JsonBackReference
     private Department department;
 
@@ -49,11 +63,14 @@ public class Employee {
 
     public Employee() {}
 
-    public Employee(String firstName, String lastName, Date dateOfBirth, String address, String phoneNumber, String email, String position, Date hireDate, Department department, int salaryId) {
+    public Employee(int id, String firstName, String lastName, Date dateOfBirth, Province provinceCode, District districtCode, Ward wardCode, String phoneNumber, String email, String position, Date hireDate, Department department, int salaryId) {
+        this.id = id;
         this.firstName = firstName;
         this.lastName = lastName;
         this.dateOfBirth = dateOfBirth;
-        this.address = address;
+        this.province = provinceCode;
+        this.district = districtCode;
+        this.ward = wardCode;
         this.phoneNumber = phoneNumber;
         this.email = email;
         this.position = position;
@@ -62,12 +79,13 @@ public class Employee {
         this.salaryId = salaryId;
     }
 
-    public Employee(int id, String firstName, String lastName, Date dateOfBirth, String address, String phoneNumber, String email, String position, Date hireDate, Department department, int salaryId) {
-        this.id = id;
+    public Employee(String firstName, String lastName, Date dateOfBirth, Province provinceCode, District districtCode, Ward wardCode, String phoneNumber, String email, String position, Date hireDate, Department department, int salaryId) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.dateOfBirth = dateOfBirth;
-        this.address = address;
+        this.province = provinceCode;
+        this.district = districtCode;
+        this.ward = wardCode;
         this.phoneNumber = phoneNumber;
         this.email = email;
         this.position = position;
@@ -108,12 +126,46 @@ public class Employee {
         this.dateOfBirth = dateOfBirth;
     }
 
-    public String getAddress() {
-        return address;
+//    public String getAddress() {
+//        return address;
+//    }
+//
+//    public void setAddress(String address) {
+//        this.address = address;
+//    }
+
+
+    public Province getProvince() {
+//        if (province == null) {
+//            province = new Province();
+//        }
+        return province;
     }
 
-    public void setAddress(String address) {
-        this.address = address;
+    public void setProvince(Province province) {
+        this.province = province;
+    }
+
+    public District getDistrict() {
+//        if (district == null) {
+//            district = new District();
+//        }
+        return district;
+    }
+
+    public void setDistrict(District district) {
+        this.district = district;
+    }
+
+    public Ward getWard() {
+//        if (ward == null) {
+//            ward = new Ward();
+//        }
+        return ward;
+    }
+
+    public void setWard(Ward ward) {
+        this.ward = ward;
     }
 
     public String getPhoneNumber() {

@@ -25,7 +25,7 @@ public class UserInfo {
     @Column(name = "ROLES")
     private String roles;
 
-    @OneToOne(cascade = CascadeType.ALL)
+    @OneToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinColumn(name = "EMP_ID")
     private Employee employee;
 

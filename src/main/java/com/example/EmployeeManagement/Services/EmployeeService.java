@@ -1,7 +1,9 @@
 package com.example.EmployeeManagement.Services;
 
 import com.example.EmployeeManagement.Entities.Employee;
+import com.example.EmployeeManagement.Repositories.AttendanceRepository;
 import com.example.EmployeeManagement.Repositories.EmployeeRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -13,6 +15,9 @@ public class EmployeeService {
 
     @Autowired
     EmployeeRepository employeeRepository;
+
+    @Autowired
+    AttendanceService attendanceService;
 
     public List<Employee> getAllEmployees() {
         return employeeRepository.findAll();
@@ -31,6 +36,7 @@ public class EmployeeService {
     }
 
     public void delete(int id) {
+        attendanceService.deleteAttendanceByEmployeeId(id);
         employeeRepository.deleteById(id);
     }
 
